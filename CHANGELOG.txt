@@ -1,0 +1,3 @@
+- Separation/removing of esp8266 related code to text file.
+- General code cleanup 
+- Removed unused rotary encoder interrupt isr. Rotary encoder still don't use interrupts.

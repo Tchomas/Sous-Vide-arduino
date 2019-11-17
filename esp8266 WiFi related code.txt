@@ -1,0 +1,86 @@
+// Esp8266 WiFi
+//***********************************
+#include <SoftwareSerial.h>
+
+SoftwareSerial ESP8266(2, 3); // RX, TX
+
+	// enable software serial
+	ESP8266.begin(9600);
+	
+	// reset ESP8266
+	ResetESP8266();   
+
+
+      // ESP8266 log ************************
+      //	SendDataESP8266();
+
+    //  CheckESP8266();
+
+
+
+
+void CheckESP8266()
+{
+  while (ESP8266.available())
+  {
+    String inData = ESP8266.readStringUntil('\n');
+    Serial.println("Rx ESP8266: " + inData);
+  }
+}
+
+void ResetESP8266()
+{
+  delay(100);
+  ESP8266.println("AT+RST");
+  delay(3000);
+  CheckESP8266();
+  ESP8266.println("AT+CIPMUX=1");
+  delay(100);
+  ESP8266.println("AT+CWMODE=3");
+  delay(100);
+  String cmd = "AT+CWJAP=\"Netflix n' chill\",\"01062013\"";
+  ESP8266.println(cmd);
+  Serial.println(cmd);
+  delay(1000);
+  ESP8266.println("AT+CIPSERVER=1,80");
+  delay(100);
+  CheckESP8266();
+}
+
+void SendDataESP8266()
+{
+  // convert to string
+  char buf[8];
+  String strTemp = dtostrf(Input, 5, 2, buf);
+
+  // TCP connection
+  String cmd ;
+
+  // prepare GET string
+  String getStr = strTemp + "\n\r";
+  //	getStr += "\n\r";
+
+  // send data length
+  cmd = "AT+CIPSEND=0,";
+  cmd += String(getStr.length());
+  ESP8266.println(cmd);
+
+  Serial.println("Tx: " + cmd);
+  delay(200);
+
+  if (ESP8266.find(">")) {
+    ESP8266.print(getStr);
+    Serial.println(getStr);
+    delay(200);
+    //	ESP8266.println("AT+CIPCLOSE=0");
+  }
+  else {
+    ESP8266.println("AT+CIPCLOSE");
+    // alert user
+    Serial.println("Tx: AT+CIPCLOSE");
+    // reset ESP8266
+    //	ResetESP8266();
+  }
+
+
+}
